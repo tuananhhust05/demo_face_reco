@@ -38,8 +38,10 @@ Thumbs.db
 
 # Application specific
 users_data.json
-static/images/*
-!static/images/.gitkeep
+static/facereco/images/*
+!static/facereco/images/.gitkeep
+static/facereco/temp/*
+!static/facereco/temp/.gitkeep
 
 # Model files (InsightFace sẽ tự động tải)
 ~/.insightface/

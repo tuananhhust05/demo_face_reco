@@ -6,6 +6,7 @@ Simple face recognition application built with Flask and InsightFace.
 
 - **Create New User** (`/facereco/create`): Take face photo and save user information
 - **Face Verification** (`/facereco/verify`): Search users by face
+- **Real-time Face Detection**: Live camera integration with face detection
 
 ## Installation
 
@@ -50,7 +51,9 @@ demoface_reco/
 │   ├── create.html       # Create user page
 │   └── verify.html       # Verification page
 └── static/               # Static files directory
-    └── images/           # User images storage
+    └── facereco/         # Face recognition files
+        ├── images/       # User images storage
+        └── temp/         # Temporary verification images (auto-deleted)
 ```
 
 ## Usage
@@ -71,8 +74,9 @@ demoface_reco/
 ## Notes
 
 - Application uses cosine similarity threshold ≥ 0.8 to determine matches
-- Images are saved in `static/images/` directory and are publicly accessible
+- Images are saved in `static/facereco/images/` directory and are publicly accessible
 - User data is stored in JSON file `users_data.json`
+- **Temporary verification images** are automatically saved to `static/facereco/temp/` and deleted after verification
 
 ## System Requirements
 

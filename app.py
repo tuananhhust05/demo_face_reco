@@ -7,15 +7,28 @@ import os
 from insightface.app import FaceAnalysis
 import uuid
 from datetime import datetime
+from src.anti_spoof_predict import AntiSpoofPredict
+from src.generate_patches import CropImage
+from src.utility import parse_model_name
+import time
+
+model_antispoof = AntiSpoofPredict(0)
+model_dir = "./resources/anti_spoof_models"
+
+# Suppress TensorFlow warnings
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 # Configure image storage folder
 UPLOAD_FOLDER = 'static/facereco/images'
+TEMP_FOLDER = 'static/facereco/temp'
 DATA_FILE = 'users_data.json'
 
-# Create directory if it doesn't exist
+# Create directories if they don't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(TEMP_FOLDER, exist_ok=True)
 
 # Initialize InsightFace model
 model = FaceAnalysis(name='buffalo_l')
@@ -92,6 +105,7 @@ def create_user():
 
 @app.route('/facereco/api/verify_user', methods=['POST'])
 def verify_user():
+    temp_image_path = None
     try:
         data = request.get_json()
         image_base64 = data.get('image')
@@ -103,6 +117,53 @@ def verify_user():
         image_data = base64.b64decode(image_base64.split(',')[1])
         nparr = np.frombuffer(image_data, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        # Save temporary image for verification
+        temp_image_id = str(uuid.uuid4())
+        temp_image_path = os.path.join(TEMP_FOLDER, f"verify_{temp_image_id}.jpg")
+        cv2.imwrite(temp_image_path, img)
+        print(f"Temporary image saved: {temp_image_path}")
+        
+        # anti spoofing
+        image_cropper = CropImage()
+        prediction = np.zeros((1, 3))
+        image_bbox = model_antispoof.get_bbox(img)
+        test_speed = 0
+        # sum the prediction from single model's result
+        for model_name in os.listdir(model_dir):
+            h_input, w_input, model_type, scale = parse_model_name(model_name)
+            param = {
+                "org_img": img,
+                "bbox": image_bbox,
+                "scale": scale,
+                "out_w": w_input,
+                "out_h": h_input,
+                "crop": True,
+            }
+            if scale is None:
+                param["crop"] = False
+            img = image_cropper.crop(**param)
+            start = time.time()
+            prediction += model_antispoof.predict(img, os.path.join(model_dir, model_name))
+            test_speed += time.time()-start
+        label = np.argmax(prediction)
+        value = prediction[0][label]/2
+        
+        # Check if face is fake
+        if label == 1:
+            print(f"Image is Real Face. Score: {value}.")
+        else: 
+             print(f"Image is Fake Face. Score: {value}.")
+             return jsonify({
+                 'success': False,
+                 'error': 'Fake face detected! Please use your real face, not a photo or video.',
+                 'fake_score': float(value),
+                 'is_fake': True
+             }), 400
+
+        # Additional image quality checks
+        img_height, img_width = img.shape[:2]
+        print(f"Image dimensions: {img_width}x{img_height}")
         
         # Extract face vector
         face_vector = extract_face_vector(img)
@@ -129,21 +190,31 @@ def verify_user():
                 best_match = user
         
         if best_similarity >= 0.8:
-            return jsonify({
+            result = jsonify({
                 'success': True,
                 'match': True,
                 'user': best_match,
                 'similarity': best_similarity
             })
         else:
-            return jsonify({
+            result = jsonify({
                 'success': True,
                 'match': False,
                 'similarity': best_similarity
             })
+        
+        return result
             
     except Exception as e:
         return jsonify({'error': f'Error: {str(e)}'}), 500
+    finally:
+        # Clean up temporary image
+        if temp_image_path and os.path.exists(temp_image_path):
+            try:
+                os.remove(temp_image_path)
+                print(f"Temporary image deleted: {temp_image_path}")
+            except Exception as e:
+                print(f"Error deleting temporary image: {e}")
 
 def extract_face_vector(img):
     """Extract face vector from image"""
