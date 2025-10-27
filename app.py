@@ -38,7 +38,7 @@ def uploaded_file(filename):
     """Serve images from static/facereco/images directory"""
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-@app.route('/api/create_user', methods=['POST'])
+@app.route('/facereco/api/create_user', methods=['POST'])
 def create_user():
     try:
         data = request.get_json()
