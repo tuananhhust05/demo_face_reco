@@ -90,7 +90,7 @@ def create_user():
     except Exception as e:
         return jsonify({'error': f'Error: {str(e)}'}), 500
 
-@app.route('/api/verify_user', methods=['POST'])
+@app.route('/facereco/api/verify_user', methods=['POST'])
 def verify_user():
     try:
         data = request.get_json()
@@ -173,4 +173,4 @@ def cosine_similarity(vec1, vec2):
     return dot_product / (norm1 * norm2)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5353)
