@@ -71,12 +71,36 @@ demoface_reco/
 3. Click "Capture Photo" to take face photo for verification
 4. Click "Verify" to search for users
 
+## Configuration
+
+### Adjusting Face Similarity Threshold
+
+You can easily adjust the face matching threshold in `config.py`:
+
+```python
+FACE_SIMILARITY_THRESHOLD = 0.55  # Adjust between 0.55 and 1.0
+```
+
+**Threshold Guidelines:**
+- **0.55-0.65**: Very lenient (more matches, more false positives)
+- **0.65-0.75**: Moderate (balanced)
+- **0.75-0.85**: Strict (fewer matches, more accurate)
+- **0.85-1.0**: Very strict (high accuracy, may miss some matches)
+
+### Quick Threshold Adjustment
+
+Use the provided script:
+```bash
+python adjust_threshold.py
+```
+
 ## Notes
 
-- Application uses cosine similarity threshold ≥ 0.8 to determine matches
+- Application uses configurable cosine similarity threshold (default: 0.55)
 - Images are saved in `static/facereco/images/` directory and are publicly accessible
 - User data is stored in JSON file `users_data.json`
 - **Temporary verification images** are automatically saved to `static/facereco/temp/` and deleted after verification
+- **Anti-spoofing protection** prevents fake face attacks
 
 ## System Requirements
 
