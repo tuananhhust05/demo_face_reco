@@ -36,7 +36,7 @@ python -c "from insightface.model_zoo import get_model; get_model('buffalo_l')"
 python app.py
 ```
 
-Access the application at: http://localhost:5000
+Access the application at: http://localhost:5353
 
 ## Project Structure
 
