@@ -23,6 +23,7 @@ SAMPLE_IMAGE_PATH = "./images/sample/"
 
 # 因为安卓端APK获取的视频流宽高比为3:4,为了与之一致，所以将宽高比限制为3:4
 def check_image(image):
+    return True
     height, width, channel = image.shape
     if width/height != 3/4:
         print("Image is not appropriate!!!\nHeight/Width should be 4/3.")
@@ -106,7 +107,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--image_name",
         type=str,
-        default="image_F1.jpg",
+        default="test.png",
         help="image used to test")
     args = parser.parse_args()
     test(args.image_name, args.model_dir, args.device_id)

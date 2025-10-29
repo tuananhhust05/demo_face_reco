@@ -216,13 +216,14 @@ def verify_user():
     except Exception as e:
         return jsonify({'error': f'Error: {str(e)}'}), 500
     finally:
+        print(f"Temporary image path: {temp_image_path}")
         # Clean up temporary image
-        if temp_image_path and os.path.exists(temp_image_path):
-            try:
-                os.remove(temp_image_path)
-                print(f"Temporary image deleted: {temp_image_path}")
-            except Exception as e:
-                print(f"Error deleting temporary image: {e}")
+        # if temp_image_path and os.path.exists(temp_image_path):
+        #     try:
+        #         os.remove(temp_image_path)
+        #         print(f"Temporary image deleted: {temp_image_path}")
+        #     except Exception as e:
+                # print(f"Error deleting temporary image: {e}")
 
 def extract_face_vector(img):
     """Extract face vector from image"""
