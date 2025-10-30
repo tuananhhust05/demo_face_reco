@@ -58,6 +58,11 @@ def uploaded_file(filename):
     """Serve images from static/facereco/images directory"""
     return send_from_directory(UPLOAD_FOLDER, filename)
 
+@app.route('/facereco/temp/<filename>')
+def serve_temp_file(filename):
+    """Serve temporary images from static/facereco/temp directory"""
+    return send_from_directory(TEMP_FOLDER, filename)
+
 @app.route('/facereco/api/create_user', methods=['POST'])
 def create_user():
     try:
