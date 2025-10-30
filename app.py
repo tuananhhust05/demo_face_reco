@@ -164,6 +164,13 @@ def verify_user():
         # Check if face is fake
         if label == 1:
             print(f"Image is Real Face. Score: {value}.")
+            if(value < 0.95):
+                return jsonify({
+                 'success': False,
+                 'error': 'Face is not ok',
+                 'fake_score': 0.5,
+                 'is_fake': True
+             }), 400
         else: 
              print(f"Image is Fake Face. Score: {value}.")
              return jsonify({
